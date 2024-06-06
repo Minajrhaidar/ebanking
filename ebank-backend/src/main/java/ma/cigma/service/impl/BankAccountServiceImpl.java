@@ -33,28 +33,29 @@ class BankAccountServiceImpl implements BankAccountService {
 
 
     @Override
-    public BankAccount createBankAccount(String rib, Long customerId) throws CustomerNotFoundException {
+    public BankAccount createBankAccount(BankAccountRequestDTO requestDTO) throws CustomerNotFoundException {
         // RG_8 : Vérification de l'existence du client
-        Optional<Customer> customerOptional = customerRepository.findById(customerId);
+        Optional<Customer> customerOptional = customerRepository.findById(requestDTO.getCustomerId());
         if (customerOptional.isEmpty()) {
-            throw new CustomerNotFoundException("Customer with ID " + customerId + " not found.");
+            throw new CustomerNotFoundException("Customer with ID " + requestDTO.getCustomerId() + " not found.");
         }
 
         // RG_9 : Vérification du format du RIB (12 caractères)
-        if (!isValidRibFormat(rib)) {
+        if (!isValidRibFormat(requestDTO.getRib())) {
             throw new IllegalArgumentException("Invalid RIB format. The RIB must have 12 characters.");
         }
 
         // RG_10 : Création du compte bancaire avec le statut "Ouvert"
         BankAccount bankAccount = new BankAccount();
-        bankAccount.setRib(rib);
+        bankAccount.setRib(requestDTO.getRib());
         bankAccount.setStatus(AccountStatus.OPEN);
         bankAccount.setCustomer(customerOptional.get());
-        bankAccount.setBalance(bankAccount.getBalance());
+        bankAccount.setBalance(requestDTO.getBalance()); // Utilisez le solde initial fourni dans le DTO
 
         // Enregistrement du compte bancaire
         return bankAccountRepository.save(bankAccount);
     }
+
     // Méthode de validation du format du RIB (12 caractères)
     private boolean isValidRibFormat(String rib) {
         return rib.length() == 12;

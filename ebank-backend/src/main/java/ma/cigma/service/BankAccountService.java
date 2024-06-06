@@ -11,8 +11,7 @@ import java.util.List;
 public interface BankAccountService {
 
 
-
-    BankAccount createBankAccount(String rib, Long customerId) throws CustomerNotFoundException;
+    BankAccount createBankAccount(BankAccountRequestDTO requestDTO) throws CustomerNotFoundException;
 
     AccountOperationDTO transfer(TransferRequestDTO transferRequestDTO);
 }

@@ -24,9 +24,9 @@ public class AccountRestController {
     private BankAccountService bankAccountService;
 
     @PostMapping("/create")
-    public ResponseEntity<BankAccount> createBankAccount(@RequestBody BankAccountRequestDTO request) throws CustomerNotFoundException {
+    public ResponseEntity<BankAccount> createBankAccount(@RequestBody BankAccountRequestDTO request) {
         try {
-            BankAccount bankAccount = bankAccountService.createBankAccount(request.getRib(), request.getCustomerId());
+            BankAccount bankAccount = bankAccountService.createBankAccount(request);
             return new ResponseEntity<>(bankAccount, HttpStatus.CREATED);
         } catch (CustomerNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
