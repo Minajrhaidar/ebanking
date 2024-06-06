@@ -17,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -62,59 +63,52 @@ class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
-    public AccountOperationDTO transfer(TransferRequestDTO transferRequestDTO) {
-        BankAccount senderAccount = null;
-        try {
-            senderAccount = bankAccountRepository.findByRib(transferRequestDTO.getSourceRib())
-                    .orElseThrow(() -> new BakaccountNotFoundException("Sender bank account not found"));
-        } catch (BakaccountNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public AccountOperationDTO transfer(TransferRequestDTO transferRequestDTO) throws BakaccountNotFoundException, BalanceNotSufficentException {
+        BankAccount senderAccount = bankAccountRepository.findByRib(transferRequestDTO.getSourceRib())
+                .orElseThrow(() -> new BakaccountNotFoundException("Sender bank account not found"));
 
         if (senderAccount.getStatus() != AccountStatus.OPEN) {
             throw new IllegalStateException("Sender bank account is not open");
         }
 
         if (senderAccount.getBalance() < transferRequestDTO.getAmount()) {
-            try {
-                throw new BalanceNotSufficentException("Insufficient balance in sender bank account");
-            } catch (BalanceNotSufficentException e) {
-                throw new RuntimeException(e);
-            }
+            throw new BalanceNotSufficentException("Insufficient balance in sender bank account");
         }
 
         double amount = transferRequestDTO.getAmount();
         String description = transferRequestDTO.getDescription();
 
         // Débiter le montant du compte expéditeur
-        double newSenderBalance = senderAccount.getBalance() - amount;
-        senderAccount.setBalance(newSenderBalance);
+        senderAccount.setBalance(senderAccount.getBalance() - amount);
         bankAccountRepository.save(senderAccount);
 
         // Enregistrer l'opération de retrait
-        AccountOperation withdrawal = new AccountOperation(OperationType.WITHDRAWAL, amount, senderAccount, description);
+        AccountOperation withdrawal = new AccountOperation();
+        withdrawal.setOperationDate(new Date());
+        withdrawal.setType(OperationType.WITHDRAWAL);
+        withdrawal.setAmount(amount);
+        withdrawal.setBankAccount(senderAccount);
+        withdrawal.setDescription(description);
         accountOperationRepository.save(withdrawal);
 
-        // Créer le compte du destinataire et créditer le montant
-        BankAccount receiverAccount = null;
-        try {
-            receiverAccount = bankAccountRepository.findByRib(transferRequestDTO.getDestinationRib())
-                    .orElseThrow(() -> new BakaccountNotFoundException("Receiver bank account not found"));
-        } catch (BakaccountNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        BankAccount receiverAccount = bankAccountRepository.findByRib(transferRequestDTO.getDestinationRib())
+                .orElseThrow(() -> new BakaccountNotFoundException("Receiver bank account not found"));
 
-        double newReceiverBalance = receiverAccount.getBalance() + amount;
-        receiverAccount.setBalance(newReceiverBalance);
+        // Créditer le montant sur le compte destinataire
+        receiverAccount.setBalance(receiverAccount.getBalance() + amount);
         bankAccountRepository.save(receiverAccount);
 
         // Enregistrer l'opération de dépôt
-        AccountOperation deposit = new AccountOperation(OperationType.DEPOSIT, amount, receiverAccount, description);
+        AccountOperation deposit = new AccountOperation();
+        deposit.setOperationDate(new Date());
+        deposit.setType(OperationType.DEPOSIT);
+        deposit.setAmount(amount);
+        deposit.setBankAccount(receiverAccount);
+        deposit.setDescription(description);
         accountOperationRepository.save(deposit);
 
         // Retourner les détails de l'opération de transfert
         return modelMapper.map(withdrawal, AccountOperationDTO.class);
     }
-
 
 }

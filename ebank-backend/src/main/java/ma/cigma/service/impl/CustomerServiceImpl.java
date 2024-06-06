@@ -3,7 +3,10 @@ package ma.cigma.service.impl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.cigma.dto.CustomerDTO;
+import ma.cigma.entity.BankAccount;
 import ma.cigma.entity.Customer;
+import ma.cigma.exception.CustomerNotFoundException;
+import ma.cigma.repository.BankAccountRepository;
 import ma.cigma.repository.CustomerRepository;
 import ma.cigma.service.CustomerService;
 import ma.cigma.service.EmailService;
@@ -11,7 +14,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -21,6 +26,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 
     private CustomerRepository customerRepository;
+    private BankAccountRepository bankAccountRepository;
     private EmailService emailService;
     private ModelMapper modelMapper;
     @Override
@@ -59,50 +65,50 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
 
+    @Override
+    public CustomerDTO getCustomer(Long customerId) throws CustomerNotFoundException {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
 
+        return modelMapper.map(customer, CustomerDTO.class);
+    }
 
+    @Override
+    public CustomerDTO updateCustomer(long customerId, CustomerDTO customerDTO) throws CustomerNotFoundException {
+        Customer existingCustomer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + customerId + " not found"));
 
-//
-//    @Override
-//    public CustomerDTO saveCustomer(CustomerDTO customerDTO) {
-//        log.info("Saving new customer");
-//        Customer customer = modelMapper.map(customerDTO, Customer.class);
-//        Customer savedCustomer = customerRepository.save(customer);
-//        return modelMapper.map(savedCustomer, CustomerDTO.class);
-//    }
-//    @Override
-//    public List<CustomerDTO> listCustomers() {
-//        return customerRepository.findAll().stream()
-//                .map(customer -> modelMapper.map(customer, CustomerDTO.class))
-//                .collect(Collectors.toList());
-//    }
-//    @Override
-//    public CustomerDTO getCustomer(Long customerId) throws CustomerNotFoundException {
-//        Customer customer = customerRepository.findById(customerId)
-//                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
-//
-//        return modelMapper.map(customer, CustomerDTO.class);
-//    }
-//
-//    @Override
-//    public CustomerDTO updateCustomer(CustomerDTO customerDTO) {
-//        log.info("Updating customer");
-//        Customer customer = modelMapper.map(customerDTO, Customer.class);
-//        Customer savedCustomer = customerRepository.save(customer);
-//        return modelMapper.map(savedCustomer, CustomerDTO.class);
-//    }
-//
-//    @Override
-//    public void deleteCustomer(Long customerId) {
-//        customerRepository.deleteById(customerId);
-//    }
-//
-//
-//    @Override
-//    public List<CustomerDTO> searchCustomers(String keyword) {
-//        return customerRepository.findByName(keyword).stream()
-//                .map(customer -> modelMapper.map(customer, CustomerDTO.class))
-//                .collect(Collectors.toList());
-//    }
+        existingCustomer.setName(customerDTO.getName());
+        existingCustomer.setCin(customerDTO.getCin());
+        existingCustomer.setEmail(customerDTO.getEmail());
+        existingCustomer.setBirthday(customerDTO.getBirthday());
+        existingCustomer.setPostalAddress(customerDTO.getPostalAddress());
+
+        Customer updatedCustomer = customerRepository.save(existingCustomer);
+        return modelMapper.map(updatedCustomer, CustomerDTO.class);
+    }
+
+    @Override
+    public void deleteCustomer(long customerId) throws CustomerNotFoundException {
+        Customer existingCustomer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + customerId + " not found"));
+
+        // Supprimer tous les comptes bancaires associés
+        List<BankAccount> bankAccounts = bankAccountRepository.findByCustomerId(customerId);
+        for (BankAccount bankAccount : bankAccounts) {
+            bankAccountRepository.delete(bankAccount);
+        }
+
+        // Ensuite, supprimer le client
+        customerRepository.delete(existingCustomer);
+    }
+
+    @Override
+    public List<CustomerDTO> getAllCustomers() {
+        List<Customer> customers = customerRepository.findAll();
+        return customers.stream()
+                .map(customer -> modelMapper.map(customer, CustomerDTO.class))
+                .collect(Collectors.toList());
+    }
 
 }

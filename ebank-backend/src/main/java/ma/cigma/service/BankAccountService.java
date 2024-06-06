@@ -13,5 +13,5 @@ public interface BankAccountService {
 
     BankAccount createBankAccount(BankAccountRequestDTO requestDTO) throws CustomerNotFoundException;
 
-    AccountOperationDTO transfer(TransferRequestDTO transferRequestDTO);
+    AccountOperationDTO transfer(TransferRequestDTO transferRequestDTO) throws BakaccountNotFoundException, BalanceNotSufficentException;
 }
