@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Slf4j
 public class CustomerServiceImpl implements CustomerService {
-
-
     private CustomerRepository customerRepository;
     private BankAccountRepository bankAccountRepository;
     private EmailService emailService;
@@ -33,25 +31,20 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDTO addNewCustomer(CustomerDTO customerDTO) {
         // Convertir CustomerDTO en Customer
         Customer customer = modelMapper.map(customerDTO, Customer.class);
-
         // RG_4: Le numéro d’identité doit être unique
         if (customerRepository.findByCin(customer.getCin()).isPresent()) {
             throw new IllegalArgumentException("CIN must be unique");
         }
-
         // RG_6: L’adresse mail doit être unique
         if (customerRepository.findByEmail(customer.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email must be unique");
         }
-
         // Sauvegarde du client
         Customer savedCustomer = customerRepository.save(customer);
-
         // RG_7: Envoyer un email avec le login et le mot de passe
         String login = generateLogin(savedCustomer);
         String password = generatePassword();
         emailService.sendEmail(savedCustomer.getEmail(), "Welcome", "Your login: " + login + " and password: " + password);
-
         // Retourner le CustomerDTO
         return modelMapper.map(savedCustomer, CustomerDTO.class);
     }
@@ -61,7 +54,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private String generatePassword() {
-        return UUID.randomUUID().toString();
+        return UUID.randomUUID().toString().substring(0,8);
     }
 
 

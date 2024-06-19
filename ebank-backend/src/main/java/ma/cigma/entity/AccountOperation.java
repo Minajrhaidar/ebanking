@@ -32,6 +32,6 @@ public class AccountOperation implements Serializable {
 
     private String description;
 
-    public AccountOperation(OperationType operationType, double amount, BankAccount senderAccount, String description) {
-    }
+    @ManyToOne
+    private User user;
 }

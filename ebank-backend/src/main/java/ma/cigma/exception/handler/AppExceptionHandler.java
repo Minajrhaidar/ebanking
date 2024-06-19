@@ -1,6 +1,6 @@
 package ma.cigma.exception.handler;
 
-import ma.cigma.exception.BakaccountNotFoundException;
+import ma.cigma.exception.BankAccountNotFoundException;
 import ma.cigma.exception.BalanceNotSufficentException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class AppExceptionHandler {
 
-    @ExceptionHandler(BakaccountNotFoundException.class)
-    public ResponseEntity<String> handleBakaccountNotFoundException(BakaccountNotFoundException ex) {
+    @ExceptionHandler(BankAccountNotFoundException.class)
+    public ResponseEntity<String> handleBakaccountNotFoundException(BankAccountNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 

@@ -6,7 +6,7 @@ import ma.cigma.dto.*;
 import ma.cigma.entity.*;
 import ma.cigma.entity.enums.AccountStatus;
 import ma.cigma.entity.enums.OperationType;
-import ma.cigma.exception.BakaccountNotFoundException;
+import ma.cigma.exception.BankAccountNotFoundException;
 import ma.cigma.exception.BalanceNotSufficentException;
 import ma.cigma.exception.CustomerNotFoundException;
 import ma.cigma.repository.AccountOperationRepository;
@@ -63,9 +63,9 @@ class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
-    public AccountOperationDTO transfer(TransferRequestDTO transferRequestDTO) throws BakaccountNotFoundException, BalanceNotSufficentException {
+    public AccountOperationDTO transfer(TransferRequestDTO transferRequestDTO) throws BankAccountNotFoundException, BalanceNotSufficentException {
         BankAccount senderAccount = bankAccountRepository.findByRib(transferRequestDTO.getSourceRib())
-                .orElseThrow(() -> new BakaccountNotFoundException("Sender bank account not found"));
+                .orElseThrow(() -> new BankAccountNotFoundException("Sender bank account not found"));
 
         if (senderAccount.getStatus() != AccountStatus.OPEN) {
             throw new IllegalStateException("Sender bank account is not open");
@@ -92,7 +92,7 @@ class BankAccountServiceImpl implements BankAccountService {
         accountOperationRepository.save(withdrawal);
 
         BankAccount receiverAccount = bankAccountRepository.findByRib(transferRequestDTO.getDestinationRib())
-                .orElseThrow(() -> new BakaccountNotFoundException("Receiver bank account not found"));
+                .orElseThrow(() -> new BankAccountNotFoundException("Receiver bank account not found"));
 
         // Créditer le montant sur le compte destinataire
         receiverAccount.setBalance(receiverAccount.getBalance() + amount);
