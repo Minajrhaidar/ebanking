@@ -1,0 +1,45 @@
+<div class="container mt-5">
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-light text-dark">
+      <h4 class="text-center">Add New Customer</h4>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="newCustomerFormGroup" (ngSubmit)="onSubmit()">
+        <div class="form-group mb-3">
+          <label for="name" class="form-label">Name</label>
+          <input id="name" type="text" formControlName="name" class="form-control" [ngClass]="{'is-invalid': newCustomerFormGroup.get('name')?.invalid && newCustomerFormGroup.get('name')?.touched}">
+          <div *ngIf="newCustomerFormGroup.get('name')?.invalid && newCustomerFormGroup.get('name')?.touched" class="invalid-feedback">
+            Name is required
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input id="email" type="email" formControlName="email" class="form-control" [ngClass]="{'is-invalid': newCustomerFormGroup.get('email')?.invalid && newCustomerFormGroup.get('email')?.touched}">
+          <div *ngIf="newCustomerFormGroup.get('email')?.invalid && newCustomerFormGroup.get('email')?.touched" class="invalid-feedback">
+            <div *ngIf="newCustomerFormGroup.get('email')?.errors?.['required']">Email is required</div>
+            <div *ngIf="newCustomerFormGroup.get('email')?.errors?.['email']">Invalid email address</div>
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="birthday" class="form-label">Birthday</label>
+          <input id="birthday" type="date" formControlName="birthday" class="form-control" [ngClass]="{'is-invalid': newCustomerFormGroup.get('birthday')?.invalid && newCustomerFormGroup.get('birthday')?.touched}">
+          <div *ngIf="newCustomerFormGroup.get('birthday')?.invalid && newCustomerFormGroup.get('birthday')?.touched" class="invalid-feedback">
+            Birthday is required
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="postalAddress" class="form-label">Postal Address</label>
+          <input id="postalAddress" type="text" formControlName="postalAddress" class="form-control" [ngClass]="{'is-invalid': newCustomerFormGroup.get('postalAddress')?.invalid && newCustomerFormGroup.get('postalAddress')?.touched}">
+          <div *ngIf="newCustomerFormGroup.get('postalAddress')?.invalid && newCustomerFormGroup.get('postalAddress')?.touched" class="invalid-feedback">
+            Postal Address is required
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100" [disabled]="newCustomerFormGroup.invalid">Save</button>
+      </form>
+    </div>
+  </div>
+</div>

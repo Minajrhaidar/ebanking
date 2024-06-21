@@ -1,29 +1,82 @@
-<div class="container mt-2">
-  <div class="card" *ngIf="customers">
-    <div class="card-header">Customers</div>
-    <div class="card-body">
-      <table class="table">
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>name</th>
-          <th>cin</th>
-          <th>email</th>
-          <th>birthday</th>
-          <th>postal address</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let c of customers">
-          <td>{{c.id}}</td>
-          <td>{{c.name}}</td>
-          <td>{{c.cin}}</td>
-          <td>{{c.email}}</td>
-          <td>{{c.birthday}}</td>
-          <td>{{c.postalAddress}}</td>
-        </tr>
-        </tbody>
-      </table>
+<div class="container mt-4">
+  <!-- Formulaire de recherche -->
+  <form [formGroup]="searchFormGroup" (ngSubmit)="handleSearchCustomer()" class="mb-4">
+    <div class="input-group">
+      <input type="text" formControlName="keyword" class="form-control" placeholder="Enter keyword">
+      <button class="btn btn-primary" type="submit">
+        <i class="bi bi-search"></i> Search
+      </button>
     </div>
+  </form>
+  <!-- Affichage du message d'erreur s'il existe -->
+  <div class="alert alert-danger" *ngIf="errorMessage; else customerList">
+    <p>{{ errorMessage }}</p>
   </div>
+
+  <!-- Affichage de la liste des clients ou d'un message de chargement/échec -->
+  <ng-template #customerList>
+
+    <ng-container *ngIf="customers$ | async as listCustomers; else loading">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-light text-dark">
+          <h4 class="text-center">Customers</h4>
+        </div>
+        <div class="card-body">
+
+          <!-- Tableau pour afficher la liste des clients -->
+          <table class="table table-hover">
+            <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>CIN</th>
+              <th>Email</th>
+              <th>Birthday</th>
+              <th>Postal Address</th>
+              <th>Actions</th>
+              <th>View Accounts</th>
+              <th>Add Account</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let c of listCustomers">
+              <td>{{ c.id }}</td>
+              <td>{{ c.name }}</td>
+              <td>{{ c.cin }}</td>
+              <td>{{ c.email }}</td>
+              <td>{{ c.birthday | date }}</td>
+              <td>{{ c.postalAddress }}</td>
+              <td>
+                <button  (click)="handleDeleteButton(c)" class="btn btn-md btn-danger">
+                  <i class="bi bi-trash-fill text-white"></i>
+                </button>
+                <button  (click)="goToUpdateCustomer(c)" class="btn btn-md btn-primary ms-2">
+                  <i class="bi bi-pencil-fill text-white"></i>
+                </button>
+              </td>
+<!--              <td>-->
+<!--                <button (click)="handleCustomerAccounts(c)" class="btn btn-md btn-info">-->
+<!--                  <i class="bi bi-box-arrow-in-right text-white"></i>-->
+<!--                </button>-->
+<!--              </td>-->
+              <td>
+                <button class="btn btn-md btn-success">
+                  <i class="bi bi-plus-lg text-white "></i>
+                </button>
+
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </ng-container>
+  </ng-template>
+
+  <!-- Template de chargement -->
+  <ng-template #loading>
+    <div class="d-flex justify-content-center">
+      <p>Loading...</p>
+    </div>
+  </ng-template>
 </div>

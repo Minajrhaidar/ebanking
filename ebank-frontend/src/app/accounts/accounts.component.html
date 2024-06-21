@@ -1,1 +1,86 @@
-<p>accounts works!</p>
+<div class="card" style="background-color: #e1d3b6; border-radius: 10px; border: 2px solid #90604c;">
+  <div class="card-header" style="background-color: #90604c; color: #e1d3b6; border-radius: 8px 8px 0 0;">
+
+    <!-- Bouton "Add Bank Account" avec marge inférieure -->
+    <button class="btn btn-info mt-3 mb-3 float-end me-3" data-bs-toggle="modal" data-bs-target="#addAccountModal" style="background-color: #e1d3b6; border-color: #90604c;">
+      <i class="bi bi-plus"></i> Add Account
+    </button>
+
+    <!-- Formulaire de recherche -->
+    <form [formGroup]="searchFormGroup" (ngSubmit)="handleSearchBankAccount()" class="d-inline">
+      <div class="input-group">
+<!--        <label class="input-group-text" style="font-size: 20px; border-radius: 10px; background-color: #e1d3b6;" >-->
+<!--          Keyword:-->
+<!--        </label>-->
+        <input type="text" formControlName="keyword" class="form-control" style="font-size: 20px; border-radius: 0 10px 10px 0;" placeholder="Enter keyword">
+        <button type="submit" class="btn btn-info" style="font-size: 20px; border-radius: 10px; background-color: #90604c; border-color: #90604c;">
+          <i class="bi bi-search"></i> Search
+        </button>
+      </div>
+    </form>
+
+  </div>
+
+  <!-- Corps de la carte -->
+  <div class="card-body" style="background-color: #e1d3b6; color: #90604c;">
+    <ng-container *ngIf="bankAccounts$ | async as bankAccounts">
+      <table class="table mt-3" style="font-size: 18px;">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>RIB</th>
+          <th>Balance</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let account of bankAccounts">
+          <td>{{ account.id }}</td>
+          <td>{{ account.rib }}</td>
+          <td>{{ account.balance | currency:'USD':'symbol':'1.2-2' }}</td>
+          <td>{{ account.status }}</td>
+          <td>
+            <button class="btn btn-primary btn-sm me-2" (click)="goToUpdateBankAccount(account)">
+              <i class="bi bi-pencil"></i> Update
+            </button>
+            <button class="btn btn-danger btn-sm" (click)="handleDeleteButton(account)">
+              <i class="bi bi-trash"></i> Delete
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </ng-container>
+
+    <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+      {{ errorMessage }}
+    </div>
+  </div>
+</div>
+
+<!-- Modal pour ajouter un compte bancaire -->
+<div class="modal fade" id="addAccountModal" tabindex="-1" aria-labelledby="addAccountModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background-color: #e1d3b6;">
+      <div class="modal-header" style="border-bottom: none;">
+        <h5 class="modal-title" id="addAccountModalLabel" style="color: #90604c;">Add Bank Account</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Formulaire pour ajouter un compte bancaire -->
+        <form [formGroup]="addAccountFormGroup" (ngSubmit)="handleAddBankAccount()">
+          <div class="mb-3">
+            <label for="rib" class="form-label">RIB:</label>
+            <input type="text" id="rib" formControlName="rib" class="form-control" required style="border-color: #90604c;">
+          </div>
+          <div class="mb-3">
+            <label for="balance" class="form-label">Initial Balance:</label>
+            <input type="number" id="balance" formControlName="balance" class="form-control" required style="border-color: #90604c;">
+          </div>
+          <button type="submit" class="btn btn-info" style="background-color: #90604c; border-color: #90604c;">Add</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

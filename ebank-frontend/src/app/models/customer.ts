@@ -7,5 +7,5 @@ export interface Customer {
   email: string;
   birthday: Date;
   postalAddress: string;
-  bankAccounts: BankAccount[]; // Vous devrez également créer l'interface BankAccount
+  bankAccounts: BankAccount[];
 }
