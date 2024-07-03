@@ -3,7 +3,7 @@ package ma.cigma.dto.user;
 import lombok.Data;
 
 @Data
-public class LoginRequestDTO {
-  private String username;
+public class AuthRequest {
+  private String email;
   private String password;
 }

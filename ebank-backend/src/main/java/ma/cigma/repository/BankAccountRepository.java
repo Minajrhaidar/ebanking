@@ -1,6 +1,8 @@
 package ma.cigma.repository;
 
 import ma.cigma.entity.BankAccount;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,5 +14,12 @@ public interface BankAccountRepository extends JpaRepository<BankAccount,String>
     List<BankAccount> findByCustomerId(Long customerId);
 
 
+    Optional<BankAccount> findById(Long id);
+
+    boolean existsById(Long id);
+
+    void deleteById(Long id);
+
+    Page<BankAccount> searchByRibContainingIgnoreCase(String keyword, Pageable pageable);
 
 }

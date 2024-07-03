@@ -17,4 +17,5 @@ public interface CustomerService {
 
     List<CustomerDTO> getAllCustomers();
 
+    List<CustomerDTO> searchCustomers(String keyword);
 }

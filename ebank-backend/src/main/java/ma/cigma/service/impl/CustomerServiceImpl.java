@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,7 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDTO addNewCustomer(CustomerDTO customerDTO) {
         // Convertir CustomerDTO en Customer
         Customer customer = modelMapper.map(customerDTO, Customer.class);
+
         // RG_4: Le numéro d’identité doit être unique
         if (customerRepository.findByCin(customer.getCin()).isPresent()) {
             throw new IllegalArgumentException("CIN must be unique");
@@ -54,7 +56,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private String generatePassword() {
-        return UUID.randomUUID().toString().substring(0,8);
+        String uuid = UUID.randomUUID().toString();
+        return uuid.replaceAll("-", "").substring(0, 10); // Génère un mot de passe de 10 caractères aléatoires
     }
 
 
@@ -100,6 +103,14 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerDTO> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
         return customers.stream()
+                .map(customer -> modelMapper.map(customer, CustomerDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CustomerDTO> searchCustomers(String keyword) {
+        List<Customer> customerList = customerRepository.findByNameContains(keyword);
+        return customerList.stream()
                 .map(customer -> modelMapper.map(customer, CustomerDTO.class))
                 .collect(Collectors.toList());
     }

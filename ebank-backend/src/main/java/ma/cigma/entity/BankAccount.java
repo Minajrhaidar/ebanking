@@ -21,7 +21,7 @@ public class BankAccount implements Serializable {
     private Long id;
     @Column(unique = true)
     private String rib; // RIB
-    private double balance; // Solde
+    private Double balance; // Solde
     private AccountStatus status; // Statut (Ouvert, Fermé, etc.)
 
     @ManyToOne

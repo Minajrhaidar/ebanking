@@ -18,13 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/agent/accounts")
 @AllArgsConstructor
-@PreAuthorize("hasRole('AGENT_GUICHET')")
 public class BankAccountController {
 
     private BankAccountService bankAccountService;
 
     @PostMapping("/transfer")
-    @PreAuthorize("hasAuthority('ADD_TRANSFER')")
+    @PreAuthorize("hasAnyRole('ROLE_AGENT_GUICHET', 'ROLE_CLIENT')")
     public ResponseEntity<AccountOperationDTO> transfer(@Valid @RequestBody TransferRequestDTO transferRequest) throws BankAccountNotFoundException, BalanceNotSufficentException {
         AccountOperationDTO operationDTO = bankAccountService.transfer(transferRequest);
         return new ResponseEntity<>(operationDTO, HttpStatus.CREATED);

@@ -6,5 +6,5 @@ import lombok.Data;
 public class BankAccountRequestDTO {
     private String rib;
     private Long customerId;
-    private double balance;
+    private Double balance;
 }

@@ -14,6 +14,9 @@ import ma.cigma.repository.BankAccountRepository;
 import ma.cigma.repository.CustomerRepository;
 import ma.cigma.service.BankAccountService;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,7 @@ import java.util.Optional;
 @Transactional
 @AllArgsConstructor
 @Slf4j
+
 class BankAccountServiceImpl implements BankAccountService {
 
     private final CustomerRepository customerRepository;
@@ -60,6 +64,18 @@ class BankAccountServiceImpl implements BankAccountService {
     // Méthode de validation du format du RIB (12 caractères)
     private boolean isValidRibFormat(String rib) {
         return rib.length() == 12;
+    }
+
+    @Override
+    public Page<BankAccount> getAllAccounts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return bankAccountRepository.findAll(pageable);
+    }
+
+    @Override
+    public BankAccount getAccountById(Long id) throws BankAccountNotFoundException {
+        return bankAccountRepository.findById(id)
+                .orElseThrow(() -> new BankAccountNotFoundException("Account not found with ID: " + id));
     }
 
     @Override
@@ -109,6 +125,44 @@ class BankAccountServiceImpl implements BankAccountService {
 
         // Retourner les détails de l'opération de transfert
         return modelMapper.map(withdrawal, AccountOperationDTO.class);
+    }
+
+    @Override
+    public void deleteAccount(Long id) throws BankAccountNotFoundException {
+        if (!bankAccountRepository.existsById(id)) {
+            throw new BankAccountNotFoundException("Account not found with ID: " + id);
+        }
+        bankAccountRepository.deleteById(id);
+    }
+
+    @Override
+    public BankAccount updateAccount(Long id, BankAccountRequestDTO request) throws BankAccountNotFoundException {
+        BankAccount existingAccount = bankAccountRepository.findById(id)
+                .orElseThrow(() -> new BankAccountNotFoundException("Account not found with ID: " + id));
+
+        if (request.getRib() != null && isValidRibFormat(request.getRib())) {
+            existingAccount.setRib(request.getRib());
+        }
+
+        if (request.getBalance() != null) {
+            existingAccount.setBalance(request.getBalance());
+        }
+
+
+
+        return bankAccountRepository.save(existingAccount);
+    }
+
+    @Override
+    public BankAccount getAccountByRib(String rib) throws BankAccountNotFoundException {
+        return bankAccountRepository.findByRib(rib)
+                .orElseThrow(() -> new BankAccountNotFoundException("Bank account not found with RIB: " + rib));
+    }
+
+    @Override
+    public Page<BankAccount> searchAccounts(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return bankAccountRepository.searchByRibContainingIgnoreCase(keyword, pageable);
     }
 
 }
