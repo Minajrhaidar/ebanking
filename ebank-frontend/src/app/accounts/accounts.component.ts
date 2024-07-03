@@ -6,6 +6,8 @@ import Swal from 'sweetalert2';
 import {AccountStatus, BankAccount} from '../models/bank-account';
 import { BankAccountService } from '../services/bank-account.service';
 import { Router } from '@angular/router';
+import {Customer} from "../models/customer";
+import {CustomerService} from "../services/customer.service";
 
 @Component({
   selector: 'app-accounts',
@@ -18,28 +20,44 @@ export class AccountsComponent implements OnInit {
   errorMessage!: string;
   searchFormGroup: FormGroup;
   addAccountFormGroup!: FormGroup;
+  customers: Customer[] = [];
+  page: number = 0;
+  size: number = 8;
 
   constructor(
     private bankAccountService: BankAccountService,
+    private customerService: CustomerService,
     private fb: FormBuilder,
     private router: Router
   ) {
     this.searchFormGroup = this.fb.group({
-      keyword: this.fb.control('')
+      keyword: ['']
     });
     this.addAccountFormGroup=this.fb.group({
       rib:['',Validators.required],
-      balance:['', Validators.required]
+      balance:['', Validators.required],
+      customerId: ['', Validators.required]
     })
   }
 
   ngOnInit(): void {
     this.loadBankAccounts();
     this.handleSearchBankAccount();
+    this.loadCustomers();
+  }
+  loadCustomers(): void {
+    this.customerService.getCustomers().subscribe({
+      next: (customers) => {
+        this.customers = customers;
+      },
+      error: (err) => {
+        console.error('Error loading customers', err);
+      }
+    });
   }
 
   loadBankAccounts(): void {
-    this.bankAccounts$ = this.bankAccountService.getAccounts()
+    this.bankAccounts$ = this.bankAccountService.getAccounts(this.page,this.size)
       .pipe(
         catchError(error => {
           this.errorMessage = 'Error fetching bank accounts';
@@ -51,7 +69,7 @@ export class AccountsComponent implements OnInit {
 
   handleSearchBankAccount(): void {
     const kw = this.searchFormGroup.value.keyword;
-    this.bankAccounts$ = this.bankAccountService.searchAccounts(kw)
+    this.bankAccounts$ = this.bankAccountService.searchAccounts(kw, this.page,this.size)
       .pipe(
         catchError(err => {
           this.errorMessage = err.message;
@@ -132,11 +150,11 @@ export class AccountsComponent implements OnInit {
     }
 
     const newAccount: BankAccount = {
-      id: 0, // Temporairement défini à zéro, ou ajustez selon votre logique
+      id: 0,
       rib: this.addAccountFormGroup.value.rib,
       balance: this.addAccountFormGroup.value.balance,
       status: AccountStatus.OPEN,
-      customerId: 1 // Remplacez par l'ID réel du client si nécessaire
+      customerId: this.addAccountFormGroup.value.customerId  // Remplacez par l'ID réel du client si nécessaire
     };
 
     this.bankAccountService.createAccount(newAccount).subscribe({

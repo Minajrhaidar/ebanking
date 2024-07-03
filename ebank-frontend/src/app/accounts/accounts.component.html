@@ -72,13 +72,19 @@
         <form [formGroup]="addAccountFormGroup" (ngSubmit)="handleAddBankAccount()">
           <div class="mb-3">
             <label for="rib" class="form-label">RIB:</label>
-            <input type="text" id="rib" formControlName="rib" class="form-control" required style="border-color: #90604c;">
+            <input type="text" id="rib" formControlName="rib" class="form-control" required>
           </div>
           <div class="mb-3">
             <label for="balance" class="form-label">Initial Balance:</label>
-            <input type="number" id="balance" formControlName="balance" class="form-control" required style="border-color: #90604c;">
+            <input type="number" id="balance" formControlName="balance" class="form-control" required>
           </div>
-          <button type="submit" class="btn btn-info" style="background-color: #90604c; border-color: #90604c;">Add</button>
+          <div class="mb-3">
+            <label for="customer" class="form-label">Customer:</label>
+            <select id="customer" formControlName="customerId" class="form-control" required>
+              <option *ngFor="let customer of customers" [value]="customer.id">{{ customer.name }}</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-info">Add</button>
         </form>
       </div>
     </div>
